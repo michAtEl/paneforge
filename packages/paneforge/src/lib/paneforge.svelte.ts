@@ -58,6 +58,7 @@ type PaneGroupStateProps = WithRefProps<
 		keyboardResizeBy: number | null;
 		onLayout: (layout: number[]) => void | null;
 		storage: PaneGroupStorage;
+		getRoot: (() => HTMLElement) | undefined;
 	}>
 >;
 
@@ -80,6 +81,7 @@ class PaneGroupState {
 	#keyboardResizeBy: PaneGroupStateProps["keyboardResizeBy"];
 	#onLayout: PaneGroupStateProps["onLayout"];
 	#storage: PaneGroupStateProps["storage"];
+	#getRoot: PaneGroupStateProps["getRoot"];
 	dragState = $state.raw<DragState | null>(null);
 	layout = $state.raw<number[]>([]);
 	paneDataArray = $state.raw<PaneData[]>([]);
@@ -97,6 +99,7 @@ class PaneGroupState {
 		this.#keyboardResizeBy = props.keyboardResizeBy;
 		this.#onLayout = props.onLayout;
 		this.#storage = props.storage;
+		this.#getRoot = props.getRoot;
 
 		useRefById({
 			id: this.id,
@@ -206,7 +209,12 @@ class PaneGroupState {
 
 			const pivotIndices = getPivotIndices(groupId, dragHandleId);
 
-			let delta = getDeltaPercentage(e, dragHandleId, direction, dragState, keyboardResizeBy);
+			const getRoot = this.#getRoot.current;
+			const root = getRoot
+							? getRoot()
+							: document;
+
+			let delta = getDeltaPercentage(e, dragHandleId, direction, dragState, keyboardResizeBy, root);
 			if (delta === 0) return;
 
 			// support RTL
@@ -294,7 +302,12 @@ class PaneGroupState {
 		const direction = this.direction.current;
 		const layout = this.layout;
 
-		const handleElement = getResizeHandleElement(dragHandleId);
+		const getRoot = this.#getRoot.current;
+		const root = getRoot
+						? getRoot()
+						: document;
+
+		const handleElement = getResizeHandleElement(dragHandleId, root);
 
 		assert(handleElement);
 
@@ -472,7 +485,12 @@ class PaneGroupState {
 			const handleId = handle.getAttribute("data-pane-resizer-id");
 			if (!handleId) return noop;
 
-			const [idBefore, idAfter] = getResizeHandlePaneIds(groupId, handleId, paneDataArray);
+			const getRoot = this.#getRoot.current;
+			const root = getRoot
+							? getRoot()
+							: document;
+
+			const [idBefore, idAfter] = getResizeHandlePaneIds(groupId, handleId, paneDataArray, root);
 
 			if (idBefore == null || idAfter == null) return noop;
 
@@ -590,6 +608,8 @@ class PaneResizerState {
 		});
 
 		$effect(() => {
+			// eslint-disable-next-line no-console
+			console.log('effect called');
 			const node = this.#ref.current;
 			if (!node) return;
 			const disabled = this.#disabled.current;

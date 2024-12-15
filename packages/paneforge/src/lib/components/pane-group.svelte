@@ -15,6 +15,7 @@
 		ref = $bindable(null),
 		child,
 		children,
+		getRoot,
 		...restProps
 	}: PaneGroupProps = $props();
 
@@ -29,6 +30,7 @@
 		keyboardResizeBy: box.with(() => keyboardResizeBy),
 		onLayout: box.with(() => onLayoutChange),
 		storage: box.with(() => storage),
+		getRoot: box.with(() => getRoot),
 	});
 
 	export const getLayout = () => paneGroupState.layout;

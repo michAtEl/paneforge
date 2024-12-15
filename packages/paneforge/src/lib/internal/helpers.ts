@@ -268,9 +268,9 @@ export function getPaneGroupElement(id: string): HTMLElement | null {
 	return null;
 }
 
-export function getResizeHandleElement(id: string): HTMLElement | null {
+export function getResizeHandleElement(id: string, root: HTMLElement | Document): HTMLElement | null {
 	if (!isBrowser) return null;
-	const element = document.querySelector(`[data-pane-resizer-id="${id}"]`);
+	const element = root.querySelector(`[data-pane-resizer-id="${id}"]`);
 	if (element) {
 		return element as HTMLElement;
 	}
@@ -281,11 +281,12 @@ export function getDragOffsetPercentage(
 	e: ResizeEvent,
 	dragHandleId: string,
 	dir: Direction,
-	initialDragState: DragState
+	initialDragState: DragState,
+	root: HTMLElement | Document,
 ): number {
 	const isHorizontal = dir === "horizontal";
 
-	const handleElement = getResizeHandleElement(dragHandleId);
+	const handleElement = getResizeHandleElement(dragHandleId, root);
 	assert(handleElement);
 
 	const groupId = handleElement.getAttribute("data-pane-group-id");
@@ -313,7 +314,8 @@ export function getDeltaPercentage(
 	dragHandleId: string,
 	dir: Direction,
 	initialDragState: DragState | null,
-	keyboardResizeBy: number | null
+	keyboardResizeBy: number | null,
+	root: HTMLElement | Document,
 ): number {
 	if (isKeyDown(e)) {
 		const isHorizontal = dir === "horizontal";
@@ -353,7 +355,7 @@ export function getDeltaPercentage(
 	} else {
 		if (initialDragState == null) return 0;
 
-		return getDragOffsetPercentage(e, dragHandleId, dir, initialDragState);
+		return getDragOffsetPercentage(e, dragHandleId, dir, initialDragState, root);
 	}
 }
 
@@ -374,9 +376,10 @@ export function getResizeEventCursorPosition(dir: Direction, e: ResizeEvent): nu
 export function getResizeHandlePaneIds(
 	groupId: string,
 	handleId: string,
-	panesArray: PaneData[]
+	panesArray: PaneData[],
+	root: HTMLElement | Document,
 ): [idBefore: string | null, idAfter: string | null] {
-	const handle = getResizeHandleElement(handleId);
+	const handle = getResizeHandleElement(handleId, root);
 	const handles = getResizeHandleElementsForGroup(groupId);
 	const index = handle ? handles.indexOf(handle) : -1;
 

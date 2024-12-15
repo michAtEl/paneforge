@@ -124,6 +124,8 @@ export type PaneGroupPropsWithoutHTML = WithChild<{
 	 * The storage object to use for saving the layout of the panes in the group.
 	 */
 	storage?: PaneGroupStorage;
+
+	getRoot?: () => HTMLElement;
 }>;
 
 export type PaneGroupProps = PaneGroupPropsWithoutHTML &
